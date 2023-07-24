@@ -78,4 +78,9 @@ public class Projects {
     public void setProjectManager(User projectManager) {
         this.projectManager = projectManager;
     }
+
+    public List<Technology> getTechnologies() {
+        return technologies;
+    }
+
 }

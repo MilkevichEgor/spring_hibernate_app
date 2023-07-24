@@ -1,5 +1,6 @@
 package com.example.accessingdatamysql.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -72,12 +73,4 @@ public class User {
         this.role = role;
     }
 
-    public void addProject(Projects project){
-        devProject.add(project);
-        pmProject.add(project);
-    }
-
-    public User getProjects(){
-        return this;
-    }
 }

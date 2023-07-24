@@ -7,7 +7,7 @@ import java.util.List;
 @Table(name = "technology")
 public class Technology {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private int id;
 
     private String title;
@@ -18,6 +18,11 @@ public class Technology {
             inverseJoinColumns = @JoinColumn(name = "project_id"))
     private List<Projects> projects;
 
+    public Technology() {}
+    public Technology(String title) {
+        this.title = title;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -25,4 +30,5 @@ public class Technology {
     public void setTitle(String title) {
         this.title = title;
     }
+
 }
