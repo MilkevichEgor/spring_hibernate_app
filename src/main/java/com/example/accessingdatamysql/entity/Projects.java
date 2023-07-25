@@ -14,6 +14,12 @@ public class Projects {
 
     private String title;
 
+    @Transient
+    private Integer projectManagerId;
+
+    @Transient
+    private Integer developerId;
+
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "pr_tech",
             joinColumns = @JoinColumn(name = "project_id"),
@@ -34,17 +40,17 @@ public class Projects {
         this.title = title;
     }
 
-//    public Projects(String title, Integer pmId, Integer devId) {
-//        this.title = title;
-//        this.projectManagerId = pmId;
-//        this.developerId = devId;
-//    }
-
-    public Projects(String title, User pm, User dev) {
+    public Projects(String title, Integer pmId, Integer devId) {
         this.title = title;
-        this.projectManager = pm;
-        this.developer = dev;
+        this.projectManagerId = pmId;
+        this.developerId = devId;
     }
+
+//    public Projects(String title, User pm, User dev) {
+//        this.title = title;
+//        this.projectManager = pm;
+//        this.developer = dev;
+//    }
 
     public Integer getId() {
         return id;
@@ -82,5 +88,4 @@ public class Projects {
     public List<Technology> getTechnologies() {
         return technologies;
     }
-
 }

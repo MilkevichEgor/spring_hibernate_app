@@ -36,13 +36,31 @@ public class MainController {
         return "Saved user";
     }
 
+//    @PostMapping(path="/addNewProject")
+//    public @ResponseBody String addNewProject (@RequestParam String title,
+//                                               @RequestParam Integer pmId,
+//                                               @RequestParam Integer devId) {
+//        User pm = userRepository.findById(pmId).get();
+//        User dev = userRepository.findById(devId).get();
+//        Projects p = new Projects(title, pm, dev);
+//        projectRepository.save(p);
+//        return "Saved project";
+//    }
+
     @PostMapping(path="/addNewProject")
     public @ResponseBody String addNewProject (@RequestParam String title,
                                                @RequestParam Integer pmId,
                                                @RequestParam Integer devId) {
-        User pm = userRepository.findById(pmId).get();
-        User dev = userRepository.findById(devId).get();
-        Projects p = new Projects(title, pm, dev);
+        User pm = userRepository.findById(pmId).orElse(null);
+        User dev = userRepository.findById(devId).orElse(null);
+
+        if (pm == null || dev == null) {
+            return "Error: Invalid user IDs";
+        }
+
+        Projects p = new Projects(title);
+        p.setProjectManager(pm);
+        p.setDeveloper(dev);
         projectRepository.save(p);
         return "Saved project";
     }
