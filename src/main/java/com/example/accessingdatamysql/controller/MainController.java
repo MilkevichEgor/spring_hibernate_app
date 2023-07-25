@@ -1,5 +1,6 @@
 package com.example.accessingdatamysql.controller;
 
+import Exceptions.NotExistingIdExpection;
 import com.example.accessingdatamysql.entity.Projects;
 import com.example.accessingdatamysql.entity.Technology;
 import com.example.accessingdatamysql.entity.User;
@@ -8,8 +9,12 @@ import com.example.accessingdatamysql.repository.ProjectRepository;
 import com.example.accessingdatamysql.repository.TechnologyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.NoSuchElementException;
 
 @Controller
 @RequestMapping(path="/demo")
@@ -48,25 +53,29 @@ public class MainController {
 //    }
 
     @PostMapping(path="/addNewProject")
-    public @ResponseBody String addNewProject (@RequestParam String title,
+    public @ResponseBody ResponseEntity<String> addNewProject (@RequestParam String title,
                                                @RequestParam Integer pmId,
                                                @RequestParam Integer devId) {
-        User pm = userRepository.findById(pmId).orElse(null);
-        User dev = userRepository.findById(devId).orElse(null);
+        try {
+            User pm = userRepository.findById(pmId).orElseThrow(() -> new NotExistingIdExpection("Error: Project Manager not found"));
+            User dev = userRepository.findById(devId).orElseThrow(() -> new NotExistingIdExpection("Error: Developer not found"));
 
-        if (pm == null || dev == null) {
-            return "Error: Invalid user IDs";
+
+            Projects p = new Projects(title);
+            p.setProjectManager(pm);
+            p.setDeveloper(dev);
+            projectRepository.save(p);
+            // 201
+            return ResponseEntity.status(HttpStatus.CREATED).body("Saved project");
+        } catch (NotExistingIdExpection ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + ex.getMessage());
         }
-
-        Projects p = new Projects(title);
-        p.setProjectManager(pm);
-        p.setDeveloper(dev);
-        projectRepository.save(p);
-        return "Saved project";
     }
 
     @PostMapping(path="/addTech")
-    public @ResponseBody String addTech (@RequestParam String title,
+    public @ResponseBody ResponseEntity<String> addTech (@RequestParam String title,
                                          @RequestParam Integer projectId) {
         Technology existingTech = technologyRepository.findByTitle(title);
         Projects p = projectRepository.findById(projectId).get();
@@ -78,10 +87,10 @@ public class MainController {
             p.getTechnologies().add(newTech);
         }
         projectRepository.save(p);
-        return "Saved technology";
+        return ResponseEntity.status(HttpStatus.CREATED).body("Saved technology");
     }
 
-    @PostMapping(path="/updateDev")
+    @PatchMapping(path="/updateDev") // PatchMapping
     public @ResponseBody String updateDev (@RequestParam Integer devId,
                                            @RequestParam Integer projectId) {
         User dev = userRepository.findById(devId).get();
@@ -91,7 +100,7 @@ public class MainController {
         return "Updated";
     }
 
-    @PostMapping(path="/updatePm")
+    @PatchMapping(path="/updatePm") // PatchMapping
     public @ResponseBody String updatePm (@RequestParam Integer pmId,
                                           @RequestParam Integer projectId) {
         User pm = userRepository.findById(pmId).get();
@@ -101,7 +110,7 @@ public class MainController {
         return "Updated";
     }
 
-    @PostMapping(path="/rename")
+    @PatchMapping(path="/rename") // PatchMapping
     public @ResponseBody String renameUser (@RequestParam Integer id,
                                             @RequestParam String name) {
         User user = userRepository.findById(id).get();
@@ -110,10 +119,10 @@ public class MainController {
             return "Renamed";
     }
 
-    @PostMapping(path="/delete")
-    public @ResponseBody String deleteUser (@RequestParam Integer id) {
+    @DeleteMapping(path="/delete") // DeleteMapping
+    public @ResponseBody ResponseEntity<String> deleteUser (@RequestParam Integer id) {
         userRepository.deleteById(id);
-        return "Deleted";
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Deleted");
     }
 
     @GetMapping(path="/allUsers")
